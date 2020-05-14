@@ -38,7 +38,7 @@ public class MemoryGameView {
         this.timerText = new Text("");
 
         this.borderPane = new BorderPane();
-        this.scene = new Scene(this.borderPane,500, 550);
+        this.scene = new Scene(this.borderPane,1500, 1550);
         this.borderPane.setStyle("-fx-background-color: lightgray;");
         this.borderPane.setTop(this.drawTimer());
         this.borderPane.setCenter(this.drawCardsGrid());
