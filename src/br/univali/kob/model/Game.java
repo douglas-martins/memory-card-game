@@ -1,5 +1,6 @@
 package br.univali.kob.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -17,12 +18,13 @@ public class Game {
 
     private Timer timer;
 
-    private Integer cardsClicked;
+    private List<Card> cardsClicked;
 
     public Game(GameDifficulty gameDifficulty) {
         this.gameState = GameState.GAME_WAITING_START;
         this.gameDifficulty = gameDifficulty;
         this.gameCards = new GameCards();
+        this.cardsClicked = new ArrayList<>();
         this.gameStart();
     }
 
@@ -30,7 +32,7 @@ public class Game {
         return grid;
     }
 
-    public Integer getCardsClicked() {
+    public List<Card> getCardsClicked() {
         return cardsClicked;
     }
 
@@ -44,14 +46,6 @@ public class Game {
 
     public Integer getCurrentTime() {
         return currentTime;
-    }
-
-    public void setCardsClicked(Integer cardsClicked) {
-        this.cardsClicked = cardsClicked;
-    }
-
-    public void addCardsClicked() {
-        this.cardsClicked++;
     }
 
     public void gameStart() {
@@ -81,7 +75,7 @@ public class Game {
 
     }
 
-    private Boolean isGameOver() {
+    public Boolean isGameOver() {
         // TODO: add verify for cards matrix
         return (this.currentTime < 0);
     }

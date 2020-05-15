@@ -25,7 +25,7 @@ public class Card {
         isShowing = showing;
     }
 
-    public Node getNodeToDraw() {
+    public String getImagePathToDraw() {
         return this.isShowing ? this.cardType.getVisible() : this.cardType.getHide();
     }
 
