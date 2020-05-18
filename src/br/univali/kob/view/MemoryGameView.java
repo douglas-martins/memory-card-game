@@ -27,6 +27,9 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.sql.Time;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -39,12 +42,22 @@ public class MemoryGameView {
 
     private Text timerText;
 
+    private Text actionResultText;
+
     private Game game;
+
+    private Timer timer;
+
+    private List<ImageView> imageViewClicked;
+
+    private final int IMG_SIZE_WITH_HEIGHT = 150;
 
     public MemoryGameView(Stage stage, GameDifficulty gameDifficulty) {
         this.stage = stage;
         this.game = new Game(gameDifficulty);
         this.timerText = new Text("");
+        this.actionResultText = new Text("");
+        this.imageViewClicked = new ArrayList<>();
 
         this.borderPane = new BorderPane();
         this.scene = new Scene(this.borderPane,1500, 1550);
@@ -81,13 +94,11 @@ public class MemoryGameView {
         for (int i = 0; i < this.game.getGrid().size(); i++) {
             for (int j = 0; j < this.game.getGrid().get(i).size(); j++) {
                 Card card = this.game.getGrid().get(i).get(j);
-                System.out.println(card.getCardType().getHide());
-                System.out.println(card.getImagePathToDraw());
-                Image image = new Image(card.getImagePathToDraw(), 150, 150, false, false);
+                Image image = new Image(card.getImagePathToDraw(), IMG_SIZE_WITH_HEIGHT, IMG_SIZE_WITH_HEIGHT, false, false);
                 ImageView imageView = new ImageView(image);
                 imageView.addEventHandler(MouseEvent.MOUSE_CLICKED, new CardEventHandler());
 
-                gridPane.add(imageView, i, j);
+                gridPane.add(imageView, j, i);
             }
         }
 
@@ -106,17 +117,23 @@ public class MemoryGameView {
         hBox.setPadding(new Insets(15, 12,15,12));
         hBox.setStyle("-fx-border-color: darkgray; -fx-border-style: solid inside; -fx-border-width: 3; -fx-border-insets: 3; -fx-border-radius: 2;");
 
-//        hBox.getChildren().addAll(this.timerText);
+        hBox.getChildren().addAll(this.actionResultText);
         return hBox;
     }
 
     private void initGameStartCountdown() {
-        Timer timer = new Timer();
-        timer.schedule(new BeginGameTimerTask(), 0, 1000);
+        this.timer = new Timer();
+        this.timer.schedule(new BeginGameTimerTask(), 0, 1000);
     }
 
     private String getGameTimeString(Integer currentTime) {
         return ((currentTime % 3600) / 60) + ":" + (currentTime % 60);
+    }
+
+    private void changeCardImage(ImageView imageView, Card card, boolean isShowing) {
+        card.setShowing(isShowing);
+        Image image = new Image(card.getImagePathToDraw(), IMG_SIZE_WITH_HEIGHT, IMG_SIZE_WITH_HEIGHT, false, false);
+        imageView.setImage(image);
     }
 
     private class BeginGameTimerTask extends TimerTask {
@@ -124,7 +141,7 @@ public class MemoryGameView {
 
         @Override
         public void run() {
-            if (time > 0) {
+            if (time > 0 && !game.isPlayerFoundAll()) {
                 if (game.getGameState() == GameState.GAME_LOOP) {
                     // TODO: update game status
                     timerText.setText(getGameTimeString(game.getCurrentTime()));
@@ -133,10 +150,14 @@ public class MemoryGameView {
                 }
                 --time;
             } else {
-                if (game.getGameState() != GameState.GAME_PLAYER_LOST || game.getGameState() != GameState.GAME_PLAYER_WIN) {
+                if (game.getGameState() == GameState.GAME_START) {
                     time = game.getGameDifficulty().getGameTime();
-                    game.gameStart();
+                    game.gameLoop();
                     timerText.setText("Já!");
+                } else {
+                    time = 0;
+                    timer.cancel();
+                    timerText.setText("Game Over!");
                 }
             }
         }
@@ -145,30 +166,67 @@ public class MemoryGameView {
     private class CardEventHandler implements EventHandler<Event> {
         @Override
         public void handle(Event event) {
-            // TODO: add handle for clicking on cards
-            if (game.isGameOver()) {
+            if (game.getGameState() != GameState.GAME_LOOP) {
                 return;
             }
 
             Node node = (Node) event.getTarget();
-
-            System.out.println(event.getEventType());
-            System.out.println(event.getSource());
-            System.out.println(event.getTarget());
+            Integer row = GridPane.getRowIndex(node);
+            Integer column = GridPane.getColumnIndex(node);
+            Card card = game.getGrid().get(row).get(column);
+            ImageView imageView = (ImageView) event.getSource();
 
             if (game.getCardsClicked().size() < 2) {
-                Integer row = GridPane.getRowIndex(node);
-                Integer column = GridPane.getColumnIndex(node);
+                actionResultText.setText("");
+                changeCardImage(imageView, card, true);
+                game.getCardsClicked().add(card);
+                imageViewClicked.add(imageView);
 
-                ImageView imageView = (ImageView) event.getSource();
-                Card card = game.getGrid().get(row).get(column);
-                card.setShowing(true);
-                Image image = new Image(card.getImagePathToDraw(), 150, 150, false, false);
-
-                imageView.setImage(image);
+                this.checkCardsClicked();
             }
+        }
+
+        private void checkCardsClicked() {
+            if (game.getCardsClicked().size() == 2) {
+                if (this.isEqualCards()) {
+                    actionResultText.setText("Right combination");
+                    System.out.println("Right combination");
+
+                    actionResultText.setText("");
+                    game.getCardsClicked().clear();
+                    imageViewClicked.clear();
+                } else {
+                    actionResultText.setText("Wrong combination");
+                    System.out.println("Wrong combination");
+                    Timer timer = new Timer();
+                    timer.schedule(new CardWrongMatchTimerTask(), 0, 1000);
+                }
+            }
+        }
+
+        private Boolean isEqualCards() {
+            return game.getCardsClicked().get(0).getCardType().equals(game.getCardsClicked().get(1).getCardType());
         }
     }
 
+    private class CardWrongMatchTimerTask extends TimerTask {
+        private Integer time = 1;
 
+        @Override
+        public void run() {
+            if (time > 0) {
+                --time;
+            } else {
+                game.getCardsClicked().get(0).setShowing(false);
+                game.getCardsClicked().get(1).setShowing(false);
+                imageViewClicked.get(0).setImage(new Image(game.getCardsClicked().get(0).getImagePathToDraw(), IMG_SIZE_WITH_HEIGHT, IMG_SIZE_WITH_HEIGHT, false, false));
+                imageViewClicked.get(1).setImage(new Image(game.getCardsClicked().get(1).getImagePathToDraw(), IMG_SIZE_WITH_HEIGHT, IMG_SIZE_WITH_HEIGHT, false, false));
+
+                actionResultText.setText("");
+                game.getCardsClicked().clear();
+                imageViewClicked.clear();
+                this.cancel();
+            }
+        }
+    }
 }

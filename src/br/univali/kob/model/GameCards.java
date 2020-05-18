@@ -1,14 +1,9 @@
 package br.univali.kob.model;
 
-import javafx.scene.shape.Circle;
-
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 
 public final class GameCards {
     private final Card[] assets;
-
-    private final int ROW_SIZE = 5;
 
     public GameCards() {
         this.assets = new Card[]{
@@ -23,7 +18,7 @@ public final class GameCards {
                 new Card(CardType.PURPLE),
                 new Card(CardType.BROWN),
                 new Card(CardType.GOLD),
-                new Card(CardType.SALMON),
+                new Card(CardType.SKYBLUE),
                 new Card(CardType.DARKRED),
                 new Card(CardType.DARKGREEN),
                 new Card(CardType.DARKBLUE)
@@ -34,35 +29,29 @@ public final class GameCards {
     public List<List<Card>> generateGrid(GameDifficulty gameDifficulty) {
         List<List<Card>> grid = new ArrayList<>();
 
-        for (int i = 0; i < ROW_SIZE; i++) {
+        for (int i = 0; i < gameDifficulty.getRows(); i++) {
             grid.add(new ArrayList<>());
         }
 
-        int[] assetsPositions = ThreadLocalRandom.current()
-                .ints(0, this.assets.length)
-                .distinct()
-                .limit((gameDifficulty.getSize() / 2))
-                .toArray();
-
-        this.insertGridCards(grid, assetsPositions);
+        this.insertGridCards(grid, gameDifficulty);
         this.shuffleGridRow(grid);
         Collections.shuffle(grid);
 
         return grid;
     }
 
-    private void insertGridCards(List<List<Card>> grid, int[] assetsPositions) {
-        int row = 0;
-        for (int i = 0; i < assetsPositions.length; i++) {
-            grid.get(row).add(this.assets[i]);
-            grid.get(row).add(this.cardDeepCopy(this.assets[i]));
-
-            if (row < grid.size() - 1) {
-                row++;
-            } else {
-                row = 0;
-            }
+    private void insertGridCards(List<List<Card>> grid, GameDifficulty gameDifficulty) {
+        ListRandomIterator randomRows = new ListRandomIterator(gameDifficulty.getRows());
+        List<Card> shuffledCards = this.shuffleCards(gameDifficulty);
+        for (Card card : shuffledCards) {
+            grid.get(randomRows.getNextElement()).add(card);
+            grid.get(randomRows.getNextElement()).add(this.cardDeepCopy(card));
         }
+    }
+
+    private List<Card> shuffleCards(GameDifficulty gameDifficulty) {
+        Collections.shuffle(Arrays.asList(this.assets));
+        return new ArrayList<>(Arrays.asList(this.assets).subList(0, (gameDifficulty.getSize() / 2)));
     }
 
     private Card cardDeepCopy(Card card) {
@@ -72,6 +61,55 @@ public final class GameCards {
     private void shuffleGridRow(List<List<Card>> grid) {
         for (List<Card> cards : grid) {
             Collections.shuffle(cards);
+        }
+    }
+
+    private class ListRandomIterator {
+        private final List<Object> elements;
+
+        private Integer currentIndex;
+
+        private final int size;
+
+        public ListRandomIterator(int size) {
+            this.elements = new ArrayList<>();
+            this.size = size;
+            this.currentIndex = 0;
+
+            this.initList();
+        }
+
+        public Integer getNextElement() {
+            if (this.currentIndex >= this.elements.size()) {
+                this.resetList();
+                return this.getNextElement();
+            }
+            Integer nextPosition = (Integer) this.elements.get(this.currentIndex);
+            this.currentIndex++;
+            return nextPosition;
+        }
+
+        private void initList() {
+            this.elements.clear();
+            for (int i = 0; i < this.size; i++) {
+                this.elements.add(i);
+            }
+
+            Collections.shuffle(this.elements);
+        }
+
+        private void resetList() {
+            this.initList();
+            this.currentIndex = 0;
+        }
+
+        @Override
+        public String toString() {
+            return "ListRandomIterator{" +
+                    "elements=" + elements +
+                    ", currentIndex=" + currentIndex +
+                    ", size=" + size +
+                    '}';
         }
     }
 }
