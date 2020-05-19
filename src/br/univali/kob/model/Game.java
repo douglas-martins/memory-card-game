@@ -20,7 +20,19 @@ public class Game {
 
     private List<Card> cardsClicked;
 
+    private Integer rightMoves;
+
+    private Integer wrongMoves;
+
+    private Integer wins;
+
+    private Integer loses;
+
     public Game(GameDifficulty gameDifficulty) {
+        this.wrongMoves = 0;
+        this.rightMoves = 0;
+        this.wins = 0;
+        this.loses = 0;
         this.gameState = GameState.GAME_WAITING_START;
         this.gameDifficulty = gameDifficulty;
         this.gameCards = new GameCards();
@@ -46,6 +58,30 @@ public class Game {
 
     public Integer getCurrentTime() {
         return currentTime;
+    }
+
+    public Integer getRightMoves() {
+        return rightMoves;
+    }
+
+    public Integer getWrongMoves() {
+        return wrongMoves;
+    }
+
+    public Integer getWins() {
+        return wins;
+    }
+
+    public Integer getLoses() {
+        return loses;
+    }
+
+    public void addWrongMoves() {
+        this.wrongMoves++;
+    }
+
+    public void addRightMoves() {
+        this.rightMoves++;
     }
 
     public void gameStart() {
@@ -76,10 +112,12 @@ public class Game {
 
     private GameState isGameOver() {
         if (this.isTimesUp()) {
+            this.loses++;
             return GameState.GAME_PLAYER_LOST;
         }
 
         if (this.isPlayerFoundAll()) {
+            this.wins++;
             return GameState.GAME_PLAYER_WIN;
         }
         return this.gameState;
@@ -103,7 +141,6 @@ public class Game {
         public void run() {
             GameState nextGameState = isGameOver();
             if (nextGameState == GameState.GAME_LOOP) {
-//                System.out.println("Time: " + ((currentTime % 3600) / 60) + ":" + (currentTime % 60));
                 --currentTime;
             } else {
                 timer.cancel();

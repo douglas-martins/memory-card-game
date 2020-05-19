@@ -44,6 +44,9 @@ public class MemoryGameView {
 
     private Text actionResultText;
 
+    Text wrongMovesText;
+    Text rightMovesText;
+
     private Game game;
 
     private Timer timer;
@@ -117,7 +120,10 @@ public class MemoryGameView {
         hBox.setPadding(new Insets(15, 12,15,12));
         hBox.setStyle("-fx-border-color: darkgray; -fx-border-style: solid inside; -fx-border-width: 3; -fx-border-insets: 3; -fx-border-radius: 2;");
 
-        hBox.getChildren().addAll(this.actionResultText);
+        this.wrongMovesText = new Text("Erros: 0");
+        this.rightMovesText = new Text("Acertos: 0");
+
+        hBox.getChildren().addAll(this.wrongMovesText, this.actionResultText, this.rightMovesText);
         return hBox;
     }
 
@@ -143,7 +149,6 @@ public class MemoryGameView {
         public void run() {
             if (time > 0 && !game.isPlayerFoundAll()) {
                 if (game.getGameState() == GameState.GAME_LOOP) {
-                    // TODO: update game status
                     timerText.setText(getGameTimeString(game.getCurrentTime()));
                 } else {
                     timerText.setText(String.valueOf(time % 60));
@@ -188,24 +193,31 @@ public class MemoryGameView {
 
         private void checkCardsClicked() {
             if (game.getCardsClicked().size() == 2) {
-                if (this.isEqualCards()) {
+                Timer timer = new Timer();
+                boolean isEquals = this.isEqualCards();
+                if (isEquals) {
+                    game.addRightMoves();
                     actionResultText.setText("Right combination");
-                    System.out.println("Right combination");
-
-                    actionResultText.setText("");
-                    game.getCardsClicked().clear();
-                    imageViewClicked.clear();
+                    timer.schedule(new CardRightMatchTimerTask(), 0, 1000);
                 } else {
+                    game.addWrongMoves();
                     actionResultText.setText("Wrong combination");
-                    System.out.println("Wrong combination");
-                    Timer timer = new Timer();
                     timer.schedule(new CardWrongMatchTimerTask(), 0, 1000);
                 }
+                updateGameStatsText(isEquals);
             }
         }
 
         private Boolean isEqualCards() {
             return game.getCardsClicked().get(0).getCardType().equals(game.getCardsClicked().get(1).getCardType());
+        }
+
+        private void updateGameStatsText(boolean isEquals) {
+            if (isEquals) {
+                rightMovesText.setText("Acertos: " + game.getRightMoves());
+            } else {
+                wrongMovesText.setText("Erros: " + game.getWrongMoves());
+            }
         }
     }
 
@@ -222,6 +234,22 @@ public class MemoryGameView {
                 imageViewClicked.get(0).setImage(new Image(game.getCardsClicked().get(0).getImagePathToDraw(), IMG_SIZE_WITH_HEIGHT, IMG_SIZE_WITH_HEIGHT, false, false));
                 imageViewClicked.get(1).setImage(new Image(game.getCardsClicked().get(1).getImagePathToDraw(), IMG_SIZE_WITH_HEIGHT, IMG_SIZE_WITH_HEIGHT, false, false));
 
+                actionResultText.setText("");
+                game.getCardsClicked().clear();
+                imageViewClicked.clear();
+                this.cancel();
+            }
+        }
+    }
+
+    private class CardRightMatchTimerTask extends TimerTask {
+        private Integer time = 1;
+
+        @Override
+        public void run() {
+            if (time > 0) {
+                --time;
+            } else {
                 actionResultText.setText("");
                 game.getCardsClicked().clear();
                 imageViewClicked.clear();
