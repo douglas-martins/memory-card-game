@@ -1,6 +1,7 @@
 package br.univali.kob.view;
 
 import br.univali.kob.model.GameDifficulty;
+import br.univali.kob.model.GameStatus;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -10,6 +11,10 @@ import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -23,20 +28,31 @@ public class MemoryGameDifficultyModalView {
 
     private BorderPane borderPane;
 
+    private GameStatus gameStatus;
+
     public MemoryGameDifficultyModalView(Stage stage) {
+        this.initValues(stage);
+    }
+
+    public MemoryGameDifficultyModalView(Stage stage, GameStatus gameStatus) {
+        this.initValues(stage);
+        this.gameStatus = new GameStatus(gameStatus);
+    }
+
+    public Scene getScene() {
+        return scene;
+    }
+
+    private void initValues(Stage stage) {
         this.dialog = new Stage();
         this.stage = stage;
         this.borderPane = new BorderPane();
         this.borderPane.setCenter(this.drawMessage());
         this.borderPane.setBottom(this.drawVBox());
-        this.borderPane.setStyle("-fx-background-color: lightgray;");
+        this.borderPane.setStyle("-fx-background-color: ghostwhite;");
 
         this.scene = new Scene(this.borderPane,500, 550);
         this.drawModal();
-    }
-
-    public Scene getScene() {
-        return scene;
     }
 
     private void drawModal() {
@@ -51,14 +67,20 @@ public class MemoryGameDifficultyModalView {
         vBox.setAlignment(Pos.CENTER);
         vBox.setSpacing(10);
         vBox.setPadding(new Insets(15, 12,15,12));
-        vBox.setStyle("-fx-border-color: darkgray; -fx-border-style: solid inside; -fx-border-width: 3; -fx-border-insets: 3; -fx-border-radius: 2;");
+        vBox.setStyle("-fx-border-color: darkblue; -fx-border-style: solid inside; -fx-border-width: 3; -fx-border-insets: 3; -fx-border-radius: 2;");
 
         vBox.getChildren().addAll(this.drawNormalDifficultyButton(), this.drawHardDifficultyButton());
         return vBox;
     }
 
     private Text drawMessage() {
-        return new Text("Selecione uma dificuldade");
+        Text messageText = new Text("Selecione uma dificuldade");
+        messageText.setFont(Font.font("Abyssinica SIL", FontWeight.BOLD, FontPosture.REGULAR,25));
+        messageText.setFill(Color.BLUE);
+        messageText.setStroke(Color.BLACK);
+        messageText.setStrokeWidth(1);
+
+        return messageText;
     }
 
     private Button drawNormalDifficultyButton() {
@@ -78,7 +100,12 @@ public class MemoryGameDifficultyModalView {
     private class NormalDifficultyButtonEventHandler implements EventHandler<Event> {
         @Override
         public void handle(Event event) {
-            stage.setScene(new MemoryGameView(stage, GameDifficulty.NORMAL).getScene());
+            if (gameStatus != null) {
+                stage.setScene(new MemoryGameView(stage, GameDifficulty.NORMAL, gameStatus).getScene());
+            } else {
+                stage.setScene(new MemoryGameView(stage, GameDifficulty.NORMAL).getScene());
+            }
+
             stage.hide();
             dialog.close();
             stage.show();
@@ -88,7 +115,12 @@ public class MemoryGameDifficultyModalView {
     private class HardDifficultyButtonEventHandler implements EventHandler<Event> {
         @Override
         public void handle(Event event) {
-            stage.setScene(new MemoryGameView(stage, GameDifficulty.HARD).getScene());
+            if (gameStatus != null) {
+                stage.setScene(new MemoryGameView(stage, GameDifficulty.HARD, new GameStatus(gameStatus)).getScene());
+            } else {
+                stage.setScene(new MemoryGameView(stage, GameDifficulty.HARD).getScene());
+            }
+
             stage.hide();
             dialog.close();
             stage.show();

@@ -1,12 +1,10 @@
 package br.univali.kob.view;
 
-import br.univali.kob.model.Card;
-import br.univali.kob.model.Game;
-import br.univali.kob.model.GameDifficulty;
-import br.univali.kob.model.GameState;
+import br.univali.kob.model.*;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -23,6 +21,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -44,8 +45,9 @@ public class MemoryGameView {
 
     private Text actionResultText;
 
-    Text wrongMovesText;
-    Text rightMovesText;
+    private Text wrongMovesText;
+
+    private Text rightMovesText;
 
     private Game game;
 
@@ -56,21 +58,15 @@ public class MemoryGameView {
     private final int IMG_SIZE_WITH_HEIGHT = 150;
 
     public MemoryGameView(Stage stage, GameDifficulty gameDifficulty) {
-        this.stage = stage;
         this.game = new Game(gameDifficulty);
-        this.timerText = new Text("");
-        this.actionResultText = new Text("");
-        this.imageViewClicked = new ArrayList<>();
-
-        this.borderPane = new BorderPane();
-        this.scene = new Scene(this.borderPane,1500, 1550);
-        this.borderPane.setStyle("-fx-background-color: lightgray;");
-        this.borderPane.setTop(this.drawTimer());
-        this.borderPane.setCenter(this.drawCardsGrid());
-        this.borderPane.setBottom(this.drawGameStatus());
-
-        this.initGameStartCountdown();
+        this.initValues(stage);
     }
+
+    public MemoryGameView(Stage stage, GameDifficulty gameDifficulty, GameStatus gameStatus) {
+        this.game = new Game(gameDifficulty, gameStatus);
+        this.initValues(stage);
+    }
+
 
     public Scene getScene() {
         return scene;
@@ -80,14 +76,46 @@ public class MemoryGameView {
         return borderPane;
     }
 
+    private void initValues(Stage stage) {
+        this.stage = stage;
+        this.timerText = new Text("");
+        this.actionResultText = new Text("");
+        this.wrongMovesText = new Text("");
+        this.rightMovesText = new Text("");
+        this.imageViewClicked = new ArrayList<>();
+
+        this.setTextStyle(this.timerText, this.actionResultText, this.wrongMovesText, this.rightMovesText);
+
+        this.borderPane = new BorderPane();
+        this.scene = new Scene(this.borderPane,1500, 1550);
+        this.borderPane.setStyle("-fx-background-color: ghostwhite;");
+        this.borderPane.setTop(this.drawTimer());
+        this.borderPane.setCenter(this.drawGameView());
+        this.borderPane.setBottom(this.drawGameStatus());
+
+        this.initGameStartCountdown();
+    }
+
     private HBox drawTimer() {
         HBox hBox = new HBox();
         hBox.setAlignment(Pos.TOP_CENTER);
         hBox.setSpacing(10);
         hBox.setPadding(new Insets(15, 12,15,12));
-        hBox.setStyle("-fx-border-color: darkgray; -fx-border-style: solid inside; -fx-border-width: 3; -fx-border-insets: 3; -fx-border-radius: 2;");
+        hBox.setStyle("-fx-border-color: darkblue; -fx-border-style: solid inside; -fx-border-width: 3; -fx-border-insets: 3; -fx-border-radius: 2;");
 
-        hBox.getChildren().addAll(this.timerText);
+        hBox.getChildren().addAll(this.timerText, this.actionResultText);
+        return hBox;
+    }
+
+    private HBox drawGameView() {
+        HBox hBox = new HBox();
+        hBox.setAlignment(Pos.TOP_CENTER);
+        hBox.setSpacing(10);
+        hBox.setPadding(new Insets(15, 12,15,12));
+
+        Parent grid = this.drawCardsGrid();
+        hBox.getChildren().addAll(grid);
+
         return hBox;
     }
 
@@ -106,7 +134,7 @@ public class MemoryGameView {
         }
 
         gridPane.setAlignment(Pos.CENTER);
-        gridPane.setGridLinesVisible(true);
+        gridPane.setGridLinesVisible(false);
         gridPane.setHgap(1);
         gridPane.setVgap(1);
 
@@ -118,12 +146,12 @@ public class MemoryGameView {
         hBox.setAlignment(Pos.BOTTOM_CENTER);
         hBox.setSpacing(10);
         hBox.setPadding(new Insets(15, 12,15,12));
-        hBox.setStyle("-fx-border-color: darkgray; -fx-border-style: solid inside; -fx-border-width: 3; -fx-border-insets: 3; -fx-border-radius: 2;");
+        hBox.setStyle("-fx-border-color: darkblue; -fx-border-style: solid inside; -fx-border-width: 3; -fx-border-insets: 3; -fx-border-radius: 2;");
 
-        this.wrongMovesText = new Text("Erros: 0");
-        this.rightMovesText = new Text("Acertos: 0");
+        this.wrongMovesText.setText("Erros: 0");
+        this.rightMovesText.setText("Acertos: 0");
 
-        hBox.getChildren().addAll(this.wrongMovesText, this.actionResultText, this.rightMovesText);
+        hBox.getChildren().addAll(this.wrongMovesText, this.rightMovesText);
         return hBox;
     }
 
@@ -140,6 +168,15 @@ public class MemoryGameView {
         card.setShowing(isShowing);
         Image image = new Image(card.getImagePathToDraw(), IMG_SIZE_WITH_HEIGHT, IMG_SIZE_WITH_HEIGHT, false, false);
         imageView.setImage(image);
+    }
+
+    private void setTextStyle(Text ...texts) {
+        for (Text text : texts) {
+            text.setFont(Font.font("Abyssinica SIL", FontWeight.BOLD, FontPosture.REGULAR,25));
+            text.setFill(Color.BLACK);
+            text.setStroke(Color.BLACK);
+            text.setStrokeWidth(1);
+        }
     }
 
     private class BeginGameTimerTask extends TimerTask {
@@ -163,6 +200,8 @@ public class MemoryGameView {
                     time = 0;
                     timer.cancel();
                     timerText.setText("Game Over!");
+
+                    Platform.runLater(() -> new MemoryGameOverModal(stage, game));
                 }
             }
         }
@@ -171,17 +210,17 @@ public class MemoryGameView {
     private class CardEventHandler implements EventHandler<Event> {
         @Override
         public void handle(Event event) {
-            if (game.getGameState() != GameState.GAME_LOOP) {
-                return;
-            }
-
             Node node = (Node) event.getTarget();
             Integer row = GridPane.getRowIndex(node);
             Integer column = GridPane.getColumnIndex(node);
             Card card = game.getGrid().get(row).get(column);
-            ImageView imageView = (ImageView) event.getSource();
+
+            if (game.getGameState() != GameState.GAME_LOOP || card.getShowing()) {
+                return;
+            }
 
             if (game.getCardsClicked().size() < 2) {
+                ImageView imageView = (ImageView) event.getSource();
                 actionResultText.setText("");
                 changeCardImage(imageView, card, true);
                 game.getCardsClicked().add(card);
@@ -196,12 +235,12 @@ public class MemoryGameView {
                 Timer timer = new Timer();
                 boolean isEquals = this.isEqualCards();
                 if (isEquals) {
-                    game.addRightMoves();
-                    actionResultText.setText("Right combination");
+                    game.getGameStatus().addRightMove();
+                    actionResultText.setText("Combinação correta");
                     timer.schedule(new CardRightMatchTimerTask(), 0, 1000);
                 } else {
-                    game.addWrongMoves();
-                    actionResultText.setText("Wrong combination");
+                    game.getGameStatus().addWrongMove();
+                    actionResultText.setText("Combinação errada");
                     timer.schedule(new CardWrongMatchTimerTask(), 0, 1000);
                 }
                 updateGameStatsText(isEquals);
@@ -214,9 +253,9 @@ public class MemoryGameView {
 
         private void updateGameStatsText(boolean isEquals) {
             if (isEquals) {
-                rightMovesText.setText("Acertos: " + game.getRightMoves());
+                rightMovesText.setText("Acertos: " + game.getGameStatus().getRightMoves());
             } else {
-                wrongMovesText.setText("Erros: " + game.getWrongMoves());
+                wrongMovesText.setText("Erros: " + game.getGameStatus().getWrongMoves());
             }
         }
     }

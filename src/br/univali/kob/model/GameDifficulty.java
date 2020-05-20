@@ -1,8 +1,8 @@
 package br.univali.kob.model;
 
 public enum GameDifficulty {
-    NORMAL(20, 4, 210),
-    HARD(30, 6, 300);
+    NORMAL(20, 4, 120),
+    HARD(30, 6, 240);
 
     private final Integer size;
 

@@ -20,24 +20,15 @@ public class Game {
 
     private List<Card> cardsClicked;
 
-    private Integer rightMoves;
-
-    private Integer wrongMoves;
-
-    private Integer wins;
-
-    private Integer loses;
+    private GameStatus gameStatus;
 
     public Game(GameDifficulty gameDifficulty) {
-        this.wrongMoves = 0;
-        this.rightMoves = 0;
-        this.wins = 0;
-        this.loses = 0;
-        this.gameState = GameState.GAME_WAITING_START;
-        this.gameDifficulty = gameDifficulty;
-        this.gameCards = new GameCards();
-        this.cardsClicked = new ArrayList<>();
-        this.gameStart();
+        this.gameStatus = new GameStatus();
+        this.gameInitValues(gameDifficulty);
+    }
+
+    public Game(GameDifficulty gameDifficulty, GameStatus gameStatus) {
+        this.gameInitValues(gameDifficulty, gameStatus);
     }
 
     public List<List<Card>> getGrid() {
@@ -60,29 +51,7 @@ public class Game {
         return currentTime;
     }
 
-    public Integer getRightMoves() {
-        return rightMoves;
-    }
-
-    public Integer getWrongMoves() {
-        return wrongMoves;
-    }
-
-    public Integer getWins() {
-        return wins;
-    }
-
-    public Integer getLoses() {
-        return loses;
-    }
-
-    public void addWrongMoves() {
-        this.wrongMoves++;
-    }
-
-    public void addRightMoves() {
-        this.rightMoves++;
-    }
+    public GameStatus getGameStatus() { return gameStatus; }
 
     public void gameStart() {
         this.gameState = GameState.GAME_START;
@@ -97,27 +66,31 @@ public class Game {
         this.timer.schedule(new GameTimerTask(), 0, 1000);
     }
 
-    public void gameRestart() {
-    }
-
     private void gameOver(GameState gameResult) {
-        // TODO: on view, open modal to show options for restarting and status for the past game, calling gameRestart() function
         this.gameState = gameResult;
-        System.out.println("Game Over");
     }
 
-    public void gameExit() {
+    private void gameInitValues(GameDifficulty gameDifficulty, GameStatus gameStatus) {
+        this.gameStatus = new GameStatus(gameStatus, true);
+        this.gameInitValues(gameDifficulty);
+    }
 
+    private void gameInitValues(GameDifficulty gameDifficulty) {
+        this.gameState = GameState.GAME_WAITING_START;
+        this.gameDifficulty = gameDifficulty;
+        this.gameCards = new GameCards();
+        this.cardsClicked = new ArrayList<>();
+        this.gameStart();
     }
 
     private GameState isGameOver() {
         if (this.isTimesUp()) {
-            this.loses++;
+            this.gameStatus.addLoses();
             return GameState.GAME_PLAYER_LOST;
         }
 
         if (this.isPlayerFoundAll()) {
-            this.wins++;
+            this.gameStatus.addWin();
             return GameState.GAME_PLAYER_WIN;
         }
         return this.gameState;
