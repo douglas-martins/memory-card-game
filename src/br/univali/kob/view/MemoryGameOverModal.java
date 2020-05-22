@@ -70,7 +70,9 @@ public class MemoryGameOverModal {
     }
 
     private Text drawMessage() {
-        Text gameStatusText = new Text("Fim de Jogo\n\nAcertos: " + this.gameStatus.getRightMoves() + "\nErros: " + this.gameStatus.getWrongMoves());
+        Text gameStatusText = new Text("Fim de Jogo\n\nAcertos: " + this.gameStatus.getRightMoves()
+                + "\nErros: " + this.gameStatus.getWrongMoves()
+                + "\nTotal de jogadas: " + this.gameStatus.totalMoves());
         gameStatusText.setFont(Font.font("Abyssinica SIL", FontWeight.BOLD, FontPosture.REGULAR,25));
         gameStatusText.setFill(Color.BLUE);
         gameStatusText.setStroke(Color.BLACK);

@@ -1,27 +1,30 @@
 package br.univali.kob.model;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public final class GameCards {
     private final Card[] assets;
 
     public GameCards() {
         this.assets = new Card[]{
-                new Card(CardType.RED),
-                new Card(CardType.GREEN),
-                new Card(CardType.BLUE),
-                new Card(CardType.YELLOW),
-                new Card(CardType.ORANGE),
-                new Card(CardType.PINK),
-                new Card(CardType.BLACK),
-                new Card(CardType.GREY),
-                new Card(CardType.PURPLE),
-                new Card(CardType.BROWN),
-                new Card(CardType.GOLD),
-                new Card(CardType.SKYBLUE),
-                new Card(CardType.DARKRED),
-                new Card(CardType.DARKGREEN),
-                new Card(CardType.DARKBLUE)
+                new Card(CardType.RED, true),
+                new Card(CardType.GREEN, true),
+                new Card(CardType.BLUE, true),
+                new Card(CardType.YELLOW, true),
+                new Card(CardType.ORANGE, true),
+                new Card(CardType.PINK, true),
+                new Card(CardType.BLACK, true),
+                new Card(CardType.GREY, true),
+                new Card(CardType.PURPLE, true),
+                new Card(CardType.BROWN, true),
+                new Card(CardType.GOLD, true),
+                new Card(CardType.SKYBLUE, true),
+                new Card(CardType.DARKRED, true),
+                new Card(CardType.DARKGREEN, true),
+                new Card(CardType.DARKBLUE, true)
         };
         Collections.shuffle(Arrays.asList(this.assets));
     }
@@ -55,12 +58,20 @@ public final class GameCards {
     }
 
     private Card cardDeepCopy(Card card) {
-        return new Card(card.getCardType());
+        return new Card(card.getCardType(), card.getShowing());
     }
 
     private void shuffleGridRow(List<List<Card>> grid) {
         for (List<Card> cards : grid) {
             Collections.shuffle(cards);
+        }
+    }
+
+    public void changeAllCardsStatus(List<List<Card>> grid, Boolean status) {
+        for (List<Card> row : grid) {
+            for (Card card : row) {
+                card.setShowing(status);
+            }
         }
     }
 

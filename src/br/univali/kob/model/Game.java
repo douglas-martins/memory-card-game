@@ -83,7 +83,7 @@ public class Game {
         this.gameStart();
     }
 
-    private GameState isGameOver() {
+    public GameState isGameOver() {
         if (this.isTimesUp()) {
             this.gameStatus.addLoses();
             return GameState.GAME_PLAYER_LOST;

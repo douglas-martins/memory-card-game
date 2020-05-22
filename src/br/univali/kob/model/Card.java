@@ -1,8 +1,6 @@
 package br.univali.kob.model;
 
 
-import javafx.scene.Node;
-
 public class Card {
     private final CardType cardType;
 
@@ -10,6 +8,11 @@ public class Card {
 
     public Card(CardType cardType) {
         this.isShowing = false;
+        this.cardType = cardType;
+    }
+
+    public Card(CardType cardType, Boolean isShowing) {
+        this.isShowing = isShowing;
         this.cardType = cardType;
     }
 

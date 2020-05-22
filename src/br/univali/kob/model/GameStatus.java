@@ -62,6 +62,10 @@ public class GameStatus {
         this.loses++;
     }
 
+    public Integer totalMoves() {
+        return (this.rightMoves + this.wrongMoves);
+    }
+
     public void resetValues() {
         this.gameRestart();
         this.wins = 0;

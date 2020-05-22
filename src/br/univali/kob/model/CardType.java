@@ -1,10 +1,5 @@
 package br.univali.kob.model;
 
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
-
 public enum CardType {
     RED("RED"),
     GREEN("GREEN"),

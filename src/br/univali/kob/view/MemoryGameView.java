@@ -1,9 +1,6 @@
 package br.univali.kob.view;
 
 import br.univali.kob.model.*;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -19,16 +16,12 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -48,6 +41,8 @@ public class MemoryGameView {
     private Text wrongMovesText;
 
     private Text rightMovesText;
+
+    private GridPane gridPane;
 
     private Game game;
 
@@ -93,7 +88,7 @@ public class MemoryGameView {
         this.borderPane.setCenter(this.drawGameView());
         this.borderPane.setBottom(this.drawGameStatus());
 
-        this.initGameStartCountdown();
+        this.initGameTimerTasks();
     }
 
     private HBox drawTimer() {
@@ -120,7 +115,7 @@ public class MemoryGameView {
     }
 
     private Parent drawCardsGrid() {
-        GridPane gridPane = new GridPane();
+        this.gridPane = new GridPane();
 
         for (int i = 0; i < this.game.getGrid().size(); i++) {
             for (int j = 0; j < this.game.getGrid().get(i).size(); j++) {
@@ -129,16 +124,24 @@ public class MemoryGameView {
                 ImageView imageView = new ImageView(image);
                 imageView.addEventHandler(MouseEvent.MOUSE_CLICKED, new CardEventHandler());
 
-                gridPane.add(imageView, j, i);
+                this.gridPane.add(imageView, j, i);
             }
         }
 
-        gridPane.setAlignment(Pos.CENTER);
-        gridPane.setGridLinesVisible(false);
-        gridPane.setHgap(1);
-        gridPane.setVgap(1);
+        this.gridPane.setAlignment(Pos.CENTER);
+        this.gridPane.setGridLinesVisible(false);
+        this.gridPane.setHgap(1);
+        this.gridPane.setVgap(1);
 
-        return gridPane;
+        return this.gridPane;
+    }
+
+    private void changeAllCardsImage(Boolean isShowing) {
+        for (Node node : this.gridPane.getChildren()) {
+            int row = GridPane.getRowIndex(node);
+            int column = GridPane.getColumnIndex(node);
+            this.changeCardImage((ImageView) node, game.getGrid().get(row).get(column), isShowing);
+        }
     }
 
     private HBox drawGameStatus() {
@@ -155,7 +158,7 @@ public class MemoryGameView {
         return hBox;
     }
 
-    private void initGameStartCountdown() {
+    private void initGameTimerTasks() {
         this.timer = new Timer();
         this.timer.schedule(new BeginGameTimerTask(), 0, 1000);
     }
@@ -184,25 +187,29 @@ public class MemoryGameView {
 
         @Override
         public void run() {
-            if (time > 0 && !game.isPlayerFoundAll()) {
-                if (game.getGameState() == GameState.GAME_LOOP) {
-                    timerText.setText(getGameTimeString(game.getCurrentTime()));
-                } else {
-                    timerText.setText(String.valueOf(time % 60));
-                }
+            if (time > 0) {
+                timerText.setText(String.valueOf(time % 60));
                 --time;
             } else {
-                if (game.getGameState() == GameState.GAME_START) {
-                    time = game.getGameDifficulty().getGameTime();
-                    game.gameLoop();
-                    timerText.setText("Já!");
-                } else {
-                    time = 0;
-                    timer.cancel();
-                    timerText.setText("Game Over!");
+                changeAllCardsImage(false);
+                timer.schedule(new ViewGameTimerTask(), 0, 1000);
+                game.gameLoop();
+                timerText.setText("Já!");
+                this.cancel();
+            }
+        }
+    }
 
-                    Platform.runLater(() -> new MemoryGameOverModal(stage, game));
-                }
+    private class ViewGameTimerTask extends TimerTask {
+        @Override
+        public void run() {
+            if (game.getCurrentTime() > 0 && !game.isPlayerFoundAll()) {
+                timerText.setText(getGameTimeString(game.getCurrentTime()));
+            } else {
+                timerText.setText("Fim de Jogo!");
+                changeAllCardsImage(true);
+                Platform.runLater(() -> new MemoryGameOverModal(stage, game));
+                this.cancel();
             }
         }
     }
@@ -268,10 +275,12 @@ public class MemoryGameView {
             if (time > 0) {
                 --time;
             } else {
-                game.getCardsClicked().get(0).setShowing(false);
-                game.getCardsClicked().get(1).setShowing(false);
-                imageViewClicked.get(0).setImage(new Image(game.getCardsClicked().get(0).getImagePathToDraw(), IMG_SIZE_WITH_HEIGHT, IMG_SIZE_WITH_HEIGHT, false, false));
-                imageViewClicked.get(1).setImage(new Image(game.getCardsClicked().get(1).getImagePathToDraw(), IMG_SIZE_WITH_HEIGHT, IMG_SIZE_WITH_HEIGHT, false, false));
+                if (game.getGameState() == GameState.GAME_LOOP) {
+                    game.getCardsClicked().get(0).setShowing(false);
+                    game.getCardsClicked().get(1).setShowing(false);
+                    imageViewClicked.get(0).setImage(new Image(game.getCardsClicked().get(0).getImagePathToDraw(), IMG_SIZE_WITH_HEIGHT, IMG_SIZE_WITH_HEIGHT, false, false));
+                    imageViewClicked.get(1).setImage(new Image(game.getCardsClicked().get(1).getImagePathToDraw(), IMG_SIZE_WITH_HEIGHT, IMG_SIZE_WITH_HEIGHT, false, false));
+                }
 
                 actionResultText.setText("");
                 game.getCardsClicked().clear();
