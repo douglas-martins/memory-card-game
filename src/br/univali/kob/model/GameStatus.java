@@ -58,7 +58,7 @@ public class GameStatus {
         this.wins++;
     }
 
-    public void addLoses() {
+    public void addLost() {
         this.loses++;
     }
 
