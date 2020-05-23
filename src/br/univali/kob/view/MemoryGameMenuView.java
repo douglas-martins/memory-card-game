@@ -47,7 +47,8 @@ public class MemoryGameMenuView {
         this.scene = new Scene(this.borderPane,1500, 1550);
         this.borderPane.setCenter(this.drawHBoxGameInfo());
         this.borderPane.setBottom(this.drawHBoxActions());
-        this.borderPane.setStyle("-fx-background-color: ghostwhite;");    }
+        this.borderPane.setStyle("-fx-background-color: ghostwhite;");
+    }
 
     private HBox drawHBoxActions() {
         HBox hBox = new HBox();
