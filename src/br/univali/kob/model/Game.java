@@ -66,10 +66,6 @@ public class Game {
         this.timer.schedule(new GameTimerTask(), 0, 1000);
     }
 
-    private void gameOver(GameState gameResult) {
-        this.gameState = gameResult;
-    }
-
     private void gameInitValues(GameDifficulty gameDifficulty, GameStatus gameStatus) {
         this.gameStatus = new GameStatus(gameStatus, true);
         this.gameInitValues(gameDifficulty);
@@ -117,7 +113,7 @@ public class Game {
                 --currentTime;
             } else {
                 timer.cancel();
-                gameOver(nextGameState);
+                gameState = nextGameState;
             }
         }
     }
