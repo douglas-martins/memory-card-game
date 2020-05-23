@@ -39,7 +39,7 @@ public class MemoryGameExitView {
         return scene;
     }
 
-    public HBox drawGameStatus(GameStatus gameStatus) {
+    private HBox drawGameStatus(GameStatus gameStatus) {
         HBox hBox = new HBox();
         hBox.setAlignment(Pos.CENTER);
         hBox.setSpacing(10);
@@ -55,7 +55,7 @@ public class MemoryGameExitView {
         return hBox;
     }
 
-    public class GameExitTimerTask extends TimerTask {
+    private class GameExitTimerTask extends TimerTask {
         private Integer time = 3;
 
         @Override
@@ -65,6 +65,7 @@ public class MemoryGameExitView {
             } else {
                 this.cancel();
                 Platform.runLater(() -> {
+                    System.exit(0);
                     stage.close();
                     Platform.exit();
                 });

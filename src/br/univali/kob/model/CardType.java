@@ -19,19 +19,11 @@ public enum CardType {
 
     private final String name;
 
-    CardType(String name) {
-        this.name = name;
-    }
+    private final String basePath = "br/univali/kob/view/resources/";
 
-    public String getName() {
-        return name;
-    }
+    CardType(String name) { this.name = name; }
 
-    public String getVisible() {
-        return "br/univali/kob/view/resources/" + this.name.toLowerCase() + ".png";
-    }
+    public String getVisible() { return this.basePath + this.name.toLowerCase() + ".png"; }
 
-    public String getHide() {
-        return "br/univali/kob/view/resources/question_mark.png";
-    }
+    public String getHide() { return this.basePath + "question_mark.png"; }
 }

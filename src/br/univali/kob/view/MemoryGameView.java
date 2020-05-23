@@ -67,10 +67,6 @@ public class MemoryGameView {
         return scene;
     }
 
-    public BorderPane getBorderPane() {
-        return borderPane;
-    }
-
     private void initValues(Stage stage) {
         this.stage = stage;
         this.timerText = new Text("");

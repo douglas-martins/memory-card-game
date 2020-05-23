@@ -67,14 +67,6 @@ public final class GameCards {
         }
     }
 
-    public void changeAllCardsStatus(List<List<Card>> grid, Boolean status) {
-        for (List<Card> row : grid) {
-            for (Card card : row) {
-                card.setShowing(status);
-            }
-        }
-    }
-
     private class ListRandomIterator {
         private final List<Object> elements;
 

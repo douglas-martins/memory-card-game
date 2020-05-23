@@ -6,12 +6,7 @@ public class Card {
 
     private Boolean isShowing;
 
-    public Card(CardType cardType) {
-        this.isShowing = false;
-        this.cardType = cardType;
-    }
-
-    public Card(CardType cardType, Boolean isShowing) {
+    public Card (CardType cardType, Boolean isShowing) {
         this.isShowing = isShowing;
         this.cardType = cardType;
     }

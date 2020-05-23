@@ -1,6 +1,7 @@
 package br.univali.kob.view;
 
 import br.univali.kob.model.GameStatus;
+import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -38,10 +39,6 @@ public class MemoryGameMenuView {
 
     public Scene getScene() {
         return scene;
-    }
-
-    public BorderPane getBorderPane() {
-        return borderPane;
     }
 
     private void initValues(Stage stage) {
@@ -88,6 +85,7 @@ public class MemoryGameMenuView {
 
     private Button drawExitGameButton() {
         Button exitGameButton = new Button("Sair");
+        exitGameButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new ExitGameButtonEventHandler());
         exitGameButton.setPrefSize(100, 20);
         return exitGameButton;
     }
@@ -100,6 +98,17 @@ public class MemoryGameMenuView {
             } else {
                 new MemoryGameDifficultyModalView(stage);
             }
+        }
+    }
+
+    private class ExitGameButtonEventHandler implements EventHandler<Event> {
+        @Override
+        public void handle(Event event) {
+            Platform.runLater(() -> {
+                System.exit(0);
+                stage.close();
+                Platform.exit();
+            });
         }
     }
 }

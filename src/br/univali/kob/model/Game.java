@@ -83,7 +83,7 @@ public class Game {
         this.gameStart();
     }
 
-    public GameState isGameOver() {
+    private GameState isGameOver() {
         if (this.isTimesUp()) {
             this.gameStatus.addLost();
             return GameState.GAME_PLAYER_LOST;
@@ -96,7 +96,7 @@ public class Game {
         return this.gameState;
     }
 
-    public Boolean isTimesUp() {
+    private Boolean isTimesUp() {
         return this.currentTime <= 0;
     }
 

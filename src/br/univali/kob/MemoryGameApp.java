@@ -7,7 +7,7 @@ import javafx.stage.Stage;
 public class MemoryGameApp extends Application {
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage) {
         stage.setTitle("Jogo da Memória");
         stage.setScene(new MemoryGameMenuView(stage).getScene());
         stage.show();

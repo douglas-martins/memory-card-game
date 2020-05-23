@@ -5,7 +5,5 @@ public enum GameState {
     GAME_START,
     GAME_LOOP,
     GAME_PLAYER_LOST,
-    GAME_PLAYER_WIN,
-    GAME_RESTART,
-    GAME_EXIT
+    GAME_PLAYER_WIN
 }
