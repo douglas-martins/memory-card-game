@@ -204,7 +204,7 @@ public class MemoryGameView {
             } else {
                 timerText.setText("Fim de Jogo!");
                 changeAllCardsImage(true);
-                Platform.runLater(() -> new MemoryGameOverModal(stage, game));
+                Platform.runLater(() -> new MemoryGameOverModalView(stage, game));
                 this.cancel();
             }
         }

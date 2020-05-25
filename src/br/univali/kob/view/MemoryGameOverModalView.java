@@ -20,7 +20,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-public class MemoryGameOverModal {
+public class MemoryGameOverModalView {
     private Stage stage;
 
     private Stage dialog;
@@ -33,7 +33,7 @@ public class MemoryGameOverModal {
 
     private GameStatus gameStatus;
 
-    public MemoryGameOverModal(Stage stage, Game game) {
+    public MemoryGameOverModalView(Stage stage, Game game) {
         this.dialog = new Stage();
         this.stage = stage;
         this.gameStatus = new GameStatus(game.getGameStatus(), false);
